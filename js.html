@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>今天練習的Java Script</title>
+<style>
+    /* ================= 基本樣式 ================= */
+    body {
+        transition: background 0.3s; /* 讓原本的點擊變色更滑順 */
+        margin: 0;
+        height: 100vh;
+        overflow: hidden; /* 防止特效爆出螢幕產生滾動條 */
+        text-align: center;
+        padding-top: 50px;
+    }
+
+    button {
+        padding: 15px 30px;
+        font-size: 24px;
+        cursor: pointer;
+        background-color: #ff4757;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        transition: transform 0.1s;
+    }
+    
+    button:active {
+        transform: scale(0.9);
+    }
+
+    /* ================= 誇張特效區 ================= */
+    
+    /* 1. 畫面劇烈震動 */
+    @keyframes shake {
+        0% { transform: translate(2px, 1px) rotate(0deg); }
+        10% { transform: translate(-20px, -30px) rotate(-5deg); }
+        20% { transform: translate(-40px, 0px) rotate(5deg); }
+        30% { transform: translate(40px, 30px) rotate(0deg); }
+        40% { transform: translate(20px, -20px) rotate(5deg); }
+        50% { transform: translate(-20px, 30px) rotate(-5deg); }
+        60% { transform: translate(-40px, 20px) rotate(0deg); }
+        70% { transform: translate(40px, 20px) rotate(-5deg); }
+        80% { transform: translate(-20px, -20px) rotate(5deg); }
+        90% { transform: translate(20px, 30px) rotate(0deg); }
+        100% { transform: translate(2px, -2px) rotate(-1deg); }
+    }
+
+    /* 2. 閃瞎眼的 RGB 霓虹背景 */
+    @keyframes rainbow {
+        0% { background-color: red; }
+        14% { background-color: orange; }
+        28% { background-color: yellow; }
+        42% { background-color: #00ff00; }
+        57% { background-color: cyan; }
+        71% { background-color: blue; }
+        85% { background-color: magenta; }
+        100% { background-color: red; }
+    }
+
+    /* 套用這個 class 讓整個網頁發瘋 */
+    .crazy-mode {
+        animation: shake 0.2s infinite, rainbow 0.1s infinite !important;
+    }
+
+    /* 3. 噴射的購物車樣式 */
+    .flying-cart {
+        position: fixed;
+        font-size: 50px;
+        pointer-events: none; /* 讓購物車不能被點擊，才不會干擾操作 */
+        z-index: 9999;
+        animation: fly 1.5s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+    }
+
+    /* 購物車飛散的軌跡與旋轉 */
+    @keyframes fly {
+        0% {
+            transform: translate(0, 0) scale(1) rotate(0deg);
+            opacity: 1;
+        }
+        100% {
+            /* 這些變數會透過 JavaScript 隨機生成 */
+            transform: translate(var(--tx), var(--ty)) scale(var(--s)) rotate(var(--r));
+            opacity: 0;
+        }
+    }
+
+    /* 4. 巨大爆發文字 */
+    .huge-text {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        font-size: 15vw;
+        color: #fff;
+        text-shadow: 0 0 20px #000, 0 0 40px #ff0000, 0 0 80px #ffff00;
+        white-space: nowrap;
+        z-index: 10000;
+        pointer-events: none;
+        font-weight: bold;
+    }
+
+    .show-huge-text {
+        animation: explodeText 2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @keyframes explodeText {
+        0% { transform: translate(-50%, -50%) scale(0) rotate(-180deg); opacity: 0; }
+        30% { transform: translate(-50%, -50%) scale(1.2) rotate(10deg); opacity: 1; }
+        50% { transform: translate(-50%, -50%) scale(0.9) rotate(-10deg); }
+        100% { transform: translate(-50%, -50%) scale(2) rotate(0deg); opacity: 0; }
+    }
+</style>
+</HEAD>
+
+<!-- 保留原來的 onClick 功能 -->
+<BODY onclick="document.body.style.background='#CDC5BF'">
+    
+    <h1>今天練習的Java Script</h1>
+
+    <!-- 加上 event.stopPropagation() 防止點擊按鈕時，也觸發背景變色 -->
+    <button onclick="event.stopPropagation(); sayhi();">加入購物車</button>
+
+    <!-- 用來放置巨大特效文字的隱藏容器 -->
+    <div id="bigText" class="huge-text">買買買!!! 🛒</div>
+
+    <script>
+    function sayhi(){
+        // 1. 讓背景開始劇烈震動與閃爍 RGB
+        document.body.classList.add('crazy-mode');
+
+        // 2. 觸發畫面中央的巨大文字動畫
+        const bigText = document.getElementById('bigText');
+        bigText.classList.remove('show-huge-text');
+        void bigText.offsetWidth; // 強制瀏覽器重新渲染，這樣才能重複觸發動畫
+        bigText.classList.add('show-huge-text');
+
+        // 3. 用迴圈瞬間產生 100 台向四面八方噴射的購物車
+        for (let i = 0; i < 100; i++) {
+            createFlyingCart();
+        }
+
+        // 4. 原本的 alert() 會讓網頁卡住，所以我們用 setTimeout 延遲 0.6 秒，
+        //    讓使用者先被特效震撼一下，再跳出你原本的訊息
+        setTimeout(() => {
+            alert("今天好開心來寫網頁程式!!Happy!!");
+            
+            // 當使用者按下 alert 的「確定」後，把瘋狂特效關掉，恢復平靜
+            document.body.classList.remove('crazy-mode');
+        }, 600); 
+    }
+
+    // 這是一個用來製造「單一噴射購物車」的輔助函數
+    function createFlyingCart() {
+        const cart = document.createElement('div');
+        cart.innerHTML = '🛒';
+        cart.className = 'flying-cart';
+        
+        // 讓購物車從畫面中央偏上的位置爆發
+        cart.style.left = '50%';
+        cart.style.top = '40%';
+
+        // 隨機計算飛行的 X, Y 距離 (正負 2000px 範圍)
+        const tx = (Math.random() - 0.5) * 4000 + 'px';
+        const ty = (Math.random() - 0.5) * 4000 + 'px';
+        
+        // 隨機計算放大的倍數 (1 ~ 5 倍) 與旋轉角度
+        const scale = Math.random() * 4 + 1; 
+        const rotate = (Math.random() - 0.5) * 1000 + 'deg';
+
+        // 透過 CSS 變數 (--tx, --ty 等) 把隨機數值傳給 CSS 動畫
+        cart.style.setProperty('--tx', tx);
+        cart.style.setProperty('--ty', ty);
+        cart.style.setProperty('--s', scale);
+        cart.style.setProperty('--r', rotate);
+
+        // 將這台購物車加到網頁中
+        document.body.appendChild(cart);
+
+        // 動畫結束後 (約 1.5 秒)，把購物車元素刪除，避免網頁越來越卡
+        setTimeout(() => {
+            cart.remove();
+        }, 1500);
+    }
+    </script>
+</BODY>
+</HTML>
